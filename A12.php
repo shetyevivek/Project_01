@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Answer 12</title>
+  <title>Horizonatal Chart</title>
 </head>
 <body>
   <div>
     <h2>Student ID : 1001821620<br>Name : Vivek Vishwanath Shetye</h2><br><br><br>
+  </div>
   </div>
 </body>
 </html>
@@ -13,35 +14,59 @@
 <?php
 include_once 'connection.php';
 
-$name = $_POST['name'];
-$descrip = $_POST['descrip'];
+// Input data
+$year1 = $_POST['year1'];
+$year2 = $_POST['year2'];
+$stateco = $_POST['stateco'];
 
-// Retrieve the data
-$sql = "UPDATE description SET Description = '$descrip' WHERE Name = '$name'";
+$dataPoints = array();
+
+$sql = "SELECT COUNT(DISTINCT candidate) AS T1, year FROM ptelect WHERE year BETWEEN $year1 AND $year2 AND state_po='$stateco' GROUP BY year";
 $result = mysqli_query($con, $sql) or die('Error ' . mysqli_error($con));
 
-if(mysqli_affected_rows($con) > 0)
+$count = 0;
+
+while($row = mysqli_fetch_array($result))
 {
-    echo "Description of " .$name. " has been successfully updated to \"" .$descrip. "\"";
-    echo "<br><br><br>";
-}
+    $dataPoints[$count]["label"] = $row['year'];
+    $dataPoints[$count]["y"] = $row['T1'];
 
-$sql2 = "SELECT pics.Photo, pics.Name, priceclass.Price, description.Description, priceclass.Classify FROM pics LEFT JOIN description ON pics.Name=description.Name LEFT JOIN priceclass ON pics.Name=priceclass.Name WHERE pics.Name='$name'";
-
-$result2 = mysqli_query($con, $sql2) or die('Error ' . mysqli_error($con));
-
-while ($row = mysqli_fetch_array($result2))
-{
-    echo '<img src="data:image/jpeg;base64,'.base64_encode($row['Photo']).'" width="300px"; height="300px"; />';
-    echo '<br>';
-    echo "Name: " .$row['Name'];
-    echo '<br>';
-    echo "Price: $" .$row['Price'];
-    echo '<br>';
-    echo "Description: " .$row['Description'];
-    echo '<br>';
-    echo "Category: " .$row['Classify'];
-    echo '<br><br><br><br>';
+    $count++;
 }
 
 ?>
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<link rel="stylesheet" href="removeWatermark.css">
+<script>
+window.onload = function() {
+ 
+var chart = new CanvasJS.Chart("chartContainer", {
+    animationEnabled: true,
+    title:{
+        text: "Presidential Elections"
+    },
+    axisX: {
+        title: "Year"
+    },
+    axisY: {
+        title: "Candidates Count"
+    },
+    data: [{
+        type: "bar",
+        yValueFormatString: "# count",
+        dataPoints: <?php echo json_encode($dataPoints, JSON_NUMERIC_CHECK); ?>
+    }]
+});
+chart.render();
+ 
+}
+</script>
+</head>
+<body>
+<div id="chartContainer" style="height: 100%; width: 100%;"></div>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+</body>
+</html>

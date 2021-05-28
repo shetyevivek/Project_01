@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Answer 11</title>
+  <title>Point Chart</title>
 </head>
 <body>
   <div>
     <h2>Student ID : 1001821620<br>Name : Vivek Vishwanath Shetye</h2><br><br><br>
+  </div>
   </div>
 </body>
 </html>
@@ -13,51 +14,63 @@
 <?php
 include_once 'connection.php';
 
-$p1 = $_POST['p1'];
-$p2 = $_POST['p2'];
-$c1 = $_POST['c1'];
-$c2 = $_POST['c2'];
-$c3 = $_POST['c3'];
+// Input data
+$year1 = $_POST['year1'];
+$year2 = $_POST['year2'];
+$stateco = $_POST['stateco'];
 
-if($c1 == '' && $c2 == '' && $c3 == '')
+$dataPoints = array();
+
+$sql = "SELECT year, totalvotes FROM ptelect WHERE year BETWEEN $year1 AND $year2 AND state_po='$stateco' GROUP BY year";
+$result = mysqli_query($con, $sql) or die('Error ' . mysqli_error($con));
+
+$count = 0;
+
+while($row = mysqli_fetch_array($result))
 {
-    $sql = "SELECT pics.Photo, priceclass.Name, priceclass.Price, description.Description, priceclass.Classify FROM priceclass LEFT JOIN description ON priceclass.Name=description.Name LEFT JOIN pics ON priceclass.Name=pics.Name WHERE priceclass.Price BETWEEN $p1 AND $p2";
+    $dataPoints[$count]["label"] = $row['year'];
+    $dataPoints[$count]["y"] = $row['totalvotes'];
 
-    $result = mysqli_query($con, $sql) or die('Error ' . mysqli_error($con));
-
-    while ($row = mysqli_fetch_array($result))
-    {
-        echo '<img src="data:image/jpeg;base64,'.base64_encode($row['Photo']).'" width="300px"; height="300px"; />';
-        echo '<br>';
-        echo "Name: " .$row['Name'];
-        echo '<br>';
-        echo "Price: $" .$row['Price'];
-        echo '<br>';
-        echo "Description: " .$row['Description'];
-        echo '<br>';
-        echo "Category: " .$row['Classify'];
-        echo '<br><br><br><br>';
-    }
-}
-else
-{
-    $sql = "SELECT pics.Photo, priceclass.Name, priceclass.Price, description.Description, priceclass.Classify FROM priceclass LEFT JOIN description ON priceclass.Name=description.Name LEFT JOIN pics ON priceclass.Name=pics.Name WHERE priceclass.Price BETWEEN $p1 AND $p2 AND priceclass.Classify IN ('$c1', '$c2', '$c3')";
-
-    $result = mysqli_query($con, $sql) or die('Error ' . mysqli_error($con));
-
-    while ($row = mysqli_fetch_array($result))
-    {
-        echo '<img src="data:image/jpeg;base64,'.base64_encode($row['Photo']).'" width="300px"; height="300px"; />';
-        echo '<br>';
-        echo "Name: " .$row['Name'];
-        echo '<br>';
-        echo "Price: $" .$row['Price'];
-        echo '<br>';
-        echo "Description: " .$row['Description'];
-        echo '<br>';
-        echo "Category: " .$row['Classify'];
-        echo '<br><br><br><br>';
-    }
+    $count++;
 }
 
 ?>
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<link rel="stylesheet" href="removeWatermark.css">
+<script>
+window.onload = function () {
+ 
+var chart = new CanvasJS.Chart("chartContainer", {
+    animationEnabled: true,
+    exportEnabled: true,
+    theme: "light1", 
+    title:{
+        text: "Presidential Elections"
+    },
+    axisX:{
+        title: "Year"
+    },
+    axisY:{
+        title: "Total Votes"
+    },
+    data: [{
+        type: "scatter",
+        markerType: "square",
+        markerSize: 10,
+        toolTipContent: "Year: {label}<br>Total Votes: {y}",
+        dataPoints: <?php echo json_encode($dataPoints, JSON_NUMERIC_CHECK); ?>
+    }]
+});
+chart.render();
+ 
+}
+</script>
+</head>
+<body>
+<div id="chartContainer" style="height: 100%; width: 100%;"></div>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+</body>
+</html>

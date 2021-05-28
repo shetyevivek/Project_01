@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Quiz 04</title>
+	<title>Quiz 03</title>
 </head>
 <body>
 	<div>
@@ -17,8 +17,6 @@
 		<a href="Q11.html">Q11 - Click here!</a><br><br>
 
 		<a href="Q12.html">Q12 - Click here!</a><br><br>
-
-		<a href="Q13.html">Bonus Question - Click here!</a><br><br>
 	</div>
 </body>
 </html>
